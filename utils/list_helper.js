@@ -10,7 +10,18 @@ const totalLikes = (blogs) => {
   )
 }
 
+const favouriteBlog = (blogs) => {
+  const blog = blogs.reduce(
+    (prev, cur) => (prev?.likes > cur.likes ? prev : cur),
+    null
+  )
+  
+  delete blog._id && delete blog.url && delete blog.__v
+  return blog
+}
+
 module.exports = {
   dummy,
-  totalLikes
+  totalLikes,
+  favouriteBlog
 }
