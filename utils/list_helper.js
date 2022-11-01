@@ -1,3 +1,5 @@
+const _ = require('lodash')
+
 // eslint-disable-next-line no-unused-vars
 const dummy = (blogs) => {
   return 1
@@ -15,13 +17,30 @@ const favouriteBlog = (blogs) => {
     (prev, cur) => (prev?.likes > cur.likes ? prev : cur),
     null
   )
-  
+
   delete blog._id && delete blog.url && delete blog.__v
   return blog
+}
+
+const mostBlogs = (blogs) => {
+  var result = _(blogs)
+    .groupBy('author')
+    .reduce(
+      (prev, cur) => (prev?.length > cur.length ? prev : cur),
+      null
+    )
+
+  const res =  {
+    author: `${result[0].author}`,
+    blogs: result.length
+  }   
+
+  return res
 }
 
 module.exports = {
   dummy,
   totalLikes,
-  favouriteBlog
+  favouriteBlog,
+  mostBlogs
 }
