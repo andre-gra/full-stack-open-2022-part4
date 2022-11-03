@@ -44,7 +44,7 @@ test('a valid blog can be added', async () => {
     title: 'a very interesting post',
     author: 'me',
     url: 'url/url',
-    likes: 4 
+    likes: 4
   }
 
   await api
@@ -61,7 +61,23 @@ test('a valid blog can be added', async () => {
   expect(contents).toContain(
     'a very interesting post'
   )
-})
+},100000)
+
+test('likes to zero', async () => {
+  const badBlog = {
+    title: 'not a good post',
+    author: 'not mee',
+    url: 'url/anotherurl'
+  }
+
+  const response = await api
+    .post('/api/blogs')
+    .send(badBlog)
+    .expect(201)
+    .expect('Content-Type', /application\/json/)
+
+  expect(response.body.likes).toBe(0)
+},100000)
 
 afterAll(() => {
   mongoose.connection.close()
