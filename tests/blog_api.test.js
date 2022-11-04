@@ -3,6 +3,7 @@ const supertest = require('supertest')
 const app = require('../app')
 const api = supertest(app)
 const Blog = require('../models/blog')
+const helper = require('../utils/blog_api_helper')
 
 const initialBlogs = [
   {
@@ -61,7 +62,7 @@ test('a valid blog can be added', async () => {
   expect(contents).toContain(
     'a very interesting post'
   )
-},100000)
+}, 100000)
 
 test('likes to zero', async () => {
   const badBlog = {
@@ -77,7 +78,7 @@ test('likes to zero', async () => {
     .expect('Content-Type', /application\/json/)
 
   expect(response.body.likes).toBe(0)
-},100000)
+}, 100000)
 
 test('missed title', async () => {
   const badBlog = {
@@ -92,7 +93,7 @@ test('missed title', async () => {
     .expect(400)
 
   expect(response.status).toBe(400)
-},100000)
+}, 100000)
 
 test('missed author', async () => {
   const badBlog = {
@@ -107,7 +108,28 @@ test('missed author', async () => {
     .expect(400)
 
   expect(response.status).toBe(400)
-},100000)
+}, 100000)
+
+describe('deletion of a blog', () => {
+  test('succeeds with status code 204 if id is valid', async () => {
+    const notesAtStart = await helper.blogsInDb()
+    const noteToDelete = notesAtStart[0]
+
+    await api
+      .delete(`/api/blogs/${noteToDelete.id}`)
+      .expect(204)
+
+    const notesAtEnd = await helper.blogsInDb()
+
+    expect(notesAtEnd).toHaveLength(
+      initialBlogs.length - 1
+    )
+
+    const title = notesAtEnd.map(r => r.title)
+
+    expect(title).not.toContain(noteToDelete.title)
+  })
+})
 
 afterAll(() => {
   mongoose.connection.close()
