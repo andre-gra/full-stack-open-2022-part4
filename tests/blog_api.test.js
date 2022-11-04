@@ -79,6 +79,36 @@ test('likes to zero', async () => {
   expect(response.body.likes).toBe(0)
 },100000)
 
+test('missed title', async () => {
+  const badBlog = {
+    author: 'not mee',
+    url: 'url/anotherurl',
+    likes: 5
+  }
+
+  const response = await api
+    .post('/api/blogs')
+    .send(badBlog)
+    .expect(400)
+
+  expect(response.status).toBe(400)
+},100000)
+
+test('missed author', async () => {
+  const badBlog = {
+    title: 'Who',
+    url: 'url/anotherurl',
+    likes: 5
+  }
+
+  const response = await api
+    .post('/api/blogs')
+    .send(badBlog)
+    .expect(400)
+
+  expect(response.status).toBe(400)
+},100000)
+
 afterAll(() => {
   mongoose.connection.close()
 })

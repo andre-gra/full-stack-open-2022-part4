@@ -6,20 +6,25 @@ blogsRouter.get('/', async (request, response) => {
   response.json(blogs)
 })
 
-blogsRouter.post('', async (request, response) => {
+blogsRouter.post('/', async (request, response) => {
   const body = request.body
 
-  if (!body.likes) body.likes = 0
-  
-  const blog = new Blog({
-    title: body.title,
-    author: body.author,
-    url: body.url,
-    likes: body.likes,
-  })
+  //check title and url
+  if (body.title && body.author) {
+    if (!body.likes) body.likes = 0
 
-  const savedBlog = await blog.save()
-  response.status(201).json(savedBlog)
+    const blog = new Blog({
+      title: body.title,
+      author: body.author,
+      url: body.url,
+      likes: body.likes,
+    })
+
+    const savedBlog = await blog.save()
+    response.status(201).json(savedBlog)
+  } else {
+    response.status(400).json({ error: 'Bad request' })
+  }
 
 })
 
