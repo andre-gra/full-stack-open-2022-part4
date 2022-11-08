@@ -112,23 +112,59 @@ test('missed author', async () => {
 
 describe('deletion of a blog', () => {
   test('succeeds with status code 204 if id is valid', async () => {
-    const notesAtStart = await helper.blogsInDb()
-    const noteToDelete = notesAtStart[0]
+    const blogsAtStart = await helper.blogsInDb()
+    const blogToDelete = blogsAtStart[0]
 
     await api
-      .delete(`/api/blogs/${noteToDelete.id}`)
+      .delete(`/api/blogs/${blogToDelete.id}`)
       .expect(204)
 
-    const notesAtEnd = await helper.blogsInDb()
+    const blogsAtEnd = await helper.blogsInDb()
 
-    expect(notesAtEnd).toHaveLength(
+    expect(blogsAtEnd).toHaveLength(
       initialBlogs.length - 1
     )
 
-    const title = notesAtEnd.map(r => r.title)
+    const title = blogsAtEnd.map(r => r.title)
 
-    expect(title).not.toContain(noteToDelete.title)
+    expect(title).not.toContain(blogToDelete.title)
   })
+})
+
+describe('update of a blog', () => {
+  test('succeeds with status code 204 and with new number of likes', async () => {
+    const blogWithLikes = {
+      title: 'a blog with some likes',
+      author: 'me',
+      url: 'url/url',
+      likes: 4,
+    }
+
+    await api
+      .post('/api/blogs')
+      .send(blogWithLikes)
+      .expect(201)
+
+    const blogs = await helper.blogsInDb()
+    const likes = blogs.map(r => r.likes)
+    const ids = blogs.map(r => r.id)
+    const initialLikes = likes[likes.length - 1]
+    expect(initialLikes).toBe(4)
+    const id = ids[ids.length - 1]
+
+    const blogWithOtherLikes = {
+      likes: 24,
+    }
+
+    await api
+      .put(`/api/blogs/${id}`)
+      .send(blogWithOtherLikes)
+      .expect(201)
+
+    const newLikes = await helper.likesInBlog(id)   
+
+    expect(newLikes).toBe(24)
+  },100000)
 })
 
 afterAll(() => {

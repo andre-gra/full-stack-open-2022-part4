@@ -5,6 +5,12 @@ const blogsInDb = async () => {
   return blogs.map(blog => blog.toJSON())
 }
 
+const likesInBlog = async (id) => {
+  const blog = await Blog.findById(id)
+  return blog.likes
+}
+
 module.exports = {
-  blogsInDb
+  blogsInDb,
+  likesInBlog
 }
