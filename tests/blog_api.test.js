@@ -3,6 +3,7 @@ const supertest = require('supertest')
 const app = require('../app')
 const api = supertest(app)
 const Blog = require('../models/blog')
+const User = require('../models/user')
 const helper = require('../utils/blog_api_helper')
 
 const initialBlogs = [
@@ -20,12 +21,23 @@ const initialBlogs = [
   }
 ]
 
+const initialUsers = [
+  {
+    username: 'admin',
+    name: 'admin',
+    password: 'admin'
+  }
+]
+
 beforeEach(async () => {
   await Blog.deleteMany({})
   let noteObject = new Blog(initialBlogs[0])
   await noteObject.save()
   noteObject = new Blog(initialBlogs[1])
   await noteObject.save()
+  await User.deleteMany({})
+  let userObject = new User(initialUsers[0])
+  await userObject.save()
 }, 100000)
 
 test('all blogs are returned', async () => {
@@ -161,10 +173,61 @@ describe('update of a blog', () => {
       .send(blogWithOtherLikes)
       .expect(201)
 
-    const newLikes = await helper.likesInBlog(id)   
+    const newLikes = await helper.likesInBlog(id)
 
     expect(newLikes).toBe(24)
-  },100000)
+  }, 100000)
+})
+
+describe('users of a blog', () => {
+  test('add user with less than 3 char length', async () => {
+    const shortUsername = {
+      username: 'me',
+      name: 'me',
+      password: 'admin'
+    }
+
+    const response = await api
+      .post('/api/users')
+      .send(shortUsername)
+      .expect(400)
+
+    expect(response.body.error).toContain(
+      'is shorter than the minimum allowed length'
+    )
+  }, 100000)
+  test('add password with less than 3 char length', async () => {
+    const shortPsw = {
+      username: 'admin',
+      name: 'admin',
+      password: 'ad'
+    }
+
+    const response = await api
+      .post('/api/users')
+      .send(shortPsw)
+      .expect(400)
+
+    expect(response.body.error).toContain(
+      'Password must be at least 3 characters long'
+    )
+  }, 100000)
+  test('user must be unique', async () => {
+    const uniqueUser = {
+      username: 'admin',
+      name: 'admin',
+      password: 'admin'
+    }
+
+    const response = await api
+      .post('/api/users')
+      .send(uniqueUser)
+      .expect(400)
+
+    expect(response.body.error).toContain(
+      'username_1 dup key'
+    )
+  }, 100000)
 })
 
 afterAll(() => {
