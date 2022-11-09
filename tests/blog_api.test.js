@@ -25,7 +25,8 @@ const initialUsers = [
   {
     username: 'admin',
     name: 'admin',
-    password: 'admin'
+    password: 'admin',
+    blogs: []
   }
 ]
 
