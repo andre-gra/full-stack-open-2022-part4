@@ -25,7 +25,7 @@ const initialUsers = [
   {
     username: 'admin',
     name: 'admin',
-    password: 'admin',
+    passwordHash: '',
     blogs: []
   }
 ]
@@ -37,6 +37,8 @@ beforeEach(async () => {
   noteObject = new Blog(initialBlogs[1])
   await noteObject.save()
   await User.deleteMany({})
+  const passwordHash = await helper.passwordHash('admin')
+  initialUsers[0].passwordHash = passwordHash
   let userObject = new User(initialUsers[0])
   await userObject.save()
 }, 100000)

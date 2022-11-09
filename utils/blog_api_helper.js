@@ -1,4 +1,5 @@
 const Blog = require('../models/blog')
+const bcrypt = require('bcrypt')
 
 const blogsInDb = async () => {
   const blogs = await Blog.find({})
@@ -10,7 +11,14 @@ const likesInBlog = async (id) => {
   return blog.likes
 }
 
+const passwordHash = async(password) => {
+  const saltRounds = 10
+  const passwordHash = await bcrypt.hash(password, saltRounds)
+  return passwordHash
+}
+
 module.exports = {
   blogsInDb,
-  likesInBlog
+  likesInBlog,
+  passwordHash
 }
