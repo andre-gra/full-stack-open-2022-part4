@@ -11,12 +11,13 @@ blogsRouter.get('/', async (request, response) => {
 blogsRouter.post('/', async (request, response) => {
   const body = request.body
 
-  console.log('token1', request.token)
-  const decodedToken = jwt.verify(`${request.token}`, process.env.SECRET)
-  console.log('token2', decodedToken)
-  if (!decodedToken.id) {
+  let decodedToken = ''
+  try {
+    decodedToken = jwt.verify(`${request.token}`, process.env.SECRET)
+  } catch (error) {
     return response.status(401).json({ error: 'token missing or invalid' })
   }
+
   const user = await User.findById(decodedToken.id)
 
   //check title and url
@@ -44,6 +45,25 @@ blogsRouter.post('/', async (request, response) => {
 })
 
 blogsRouter.delete('/:id', async (request, response, next) => {
+  let decodedToken = ''
+  try {
+    decodedToken = jwt.verify(`${request.token}`, process.env.SECRET)
+  } catch (error) {
+    return response.status(401).json({ error: 'token missing or invalid' })
+  }
+    
+  console.log('decoded', decodedToken)
+
+  const blog = await Blog.findById(request.params.id)
+
+  if (!blog) {
+    return response.status(400).json({error: 'This id doesn\'t exist'})
+  }
+
+  if (blog.user.toString() !== decodedToken.id) {
+    return response.status(401).json({ error: 'token missing or invalid' })
+  }
+
   try {
     await Blog.findByIdAndRemove(request.params.id)
     response.status(204).end()
